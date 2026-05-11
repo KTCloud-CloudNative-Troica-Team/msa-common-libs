@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+out/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# VSCode
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Mac/Win
+.DS_Store
+Thumbs.db
+
+# Local
+*.local.*
+.env

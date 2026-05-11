@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package troica.notification.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option java_package = "com.troica.msa.events.notification.v1";
+option java_multiple_files = true;
+
+// Topic: notification.requested
+// Producer: any service requesting an out-of-band notification.
+// Consumer: notification-service (channel별 분기: SES / Slack / SMS)
+// SPEC §9.3 payload 매핑.
+message NotificationRequested {
+  string idempotency_key = 1;
+  Channel channel = 2;
+  string template = 3;             // e.g. "ORDER_CONFIRMED_EMAIL", "PASSWORD_RESET_EMAIL"
+  Recipient recipient = 4;
+  google.protobuf.Struct payload = 5;   // 템플릿 렌더링용 자유 형식 변수
+  google.protobuf.Timestamp occurred_at = 6;
+}
+
+message Recipient {
+  string user_id = 1;
+  string email = 2;
+  string slack_user_id = 3;
+  string phone_number = 4;
+}
+
+enum Channel {
+  CHANNEL_UNSPECIFIED = 0;
+  CHANNEL_EMAIL = 1;
+  CHANNEL_SLACK = 2;
+  CHANNEL_SMS = 3;
+}

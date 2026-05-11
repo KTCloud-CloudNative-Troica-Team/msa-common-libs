@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package troica.order.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option java_package = "com.troica.msa.events.order.v1";
+option java_multiple_files = true;
+
+// Topic: order.inventory-reserved
+// Producer: inventory-service
+// Consumer: order-service
+// 의미: 재고 예약 결과 (성공/부족/오류) 회신. Saga 분기점.
+message OrderInventoryReserved {
+  string idempotency_key = 1;
+  int64 order_id = 2;
+  repeated InventoryReserveResult results = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}
+
+message InventoryReserveResult {
+  int64 inventory_id = 1;
+  int32 requested_amount = 2;
+  ReserveState state = 3;
+  string failure_reason = 4;       // state != RESERVED 일 때만 채움
+}
+
+enum ReserveState {
+  RESERVE_STATE_UNSPECIFIED = 0;
+  RESERVE_STATE_RESERVED = 1;
+  RESERVE_STATE_INSUFFICIENT = 2;
+  RESERVE_STATE_ERROR = 3;
+}
