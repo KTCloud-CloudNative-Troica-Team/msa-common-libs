@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package troica.order.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option java_package = "com.troica.msa.events.order.v1";
+option java_multiple_files = true;
+
+// Topic: order.pending
+// Producer: order-service (Outbox poller, worker profile)
+// Consumer: inventory-service
+// 의미: 주문 생성 후 재고 예약 요청. Saga의 출발점.
+message OrderPending {
+  string idempotency_key = 1;     // UUID — 멱등성 키 (Outbox row id 기반)
+  int64 order_id = 2;
+  string user_id = 3;
+  repeated OrderLineItem line_items = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+message OrderLineItem {
+  int64 inventory_id = 1;
+  string product_id = 2;
+  string sku_code = 3;
+  int32 price = 4;
+  int32 quantity = 5;
+}
