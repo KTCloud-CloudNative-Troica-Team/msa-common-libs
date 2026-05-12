@@ -1,6 +1,12 @@
 plugins {
     kotlin("kapt")
     kotlin("plugin.jpa")
+    // R-38: Kotlin은 모든 class 기본 final → Spring @Configuration이 CGLIB proxy
+    // 만들 때 실패 ("Configuration class may not be final"). plugin.spring이 자동으로
+    // @Configuration/@Component/@Service/@Repository/@Controller 클래스에 `open`
+    // 부여. consumer 측에서 final로 컴파일된 .class를 unfinal로 못 만드므로
+    // 본 모듈이 source에서 직접 해결해야 함 (publish된 jar의 .class가 non-final).
+    kotlin("plugin.spring")
 }
 
 dependencies {
