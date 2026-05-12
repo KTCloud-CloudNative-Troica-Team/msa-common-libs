@@ -24,11 +24,12 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "java-library")
 
-    // Spring Boot BOM 으로 의존성 버전을 모노레포(SB 3.3.0)와 일치시킨다.
-    // 단, org.springframework.boot 플러그인은 적용하지 않는다 (라이브러리는 fat jar 만들 필요 없음).
+    // Spring Boot BOM 으로 의존성 버전을 통일 (사진 "기술 스택" 표준: SB 3.5.x).
+    // 3.5.13 = 2026-03-26 release, Spring Cloud 2025.0.2가 공식 테스트한 짝. 3.5 OSS support는 2026-06-30 EOL 예정.
+    // org.springframework.boot 플러그인은 적용하지 않는다 (라이브러리는 bootJar 불필요).
     the<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension>().apply {
         imports {
-            mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.0")
+            mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.13")
         }
     }
 
