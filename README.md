@@ -4,14 +4,17 @@ Troica Market Service MSA polyrepo의 공용 라이브러리.
 
 > Single source of truth: [TROICA_SPEC.md](https://github.com/KTCloud-CloudNative-Troica-Team/msa-argocd-manifest/blob/main/TROICA_SPEC.md)
 
-## 모듈
+## 모듈 (v0.3.0)
 
 | 모듈 | 좌표 | 내용 |
 |------|------|------|
 | `common`       | `com.troica.msa:common`       | JPA/QueryDSL 설정, Base 엔티티, 공통 예외, 시간/Backoff 유틸 |
-| `client-redis` | `com.troica.msa:client-redis` | Redisson 기반 분산락, 멱등 이벤트 처리(`@IdempotentEvent`) |
-| `client-ses`   | `com.troica.msa:client-ses`   | AWS SES adapter, 이메일 발송 UseCase |
-| `events`       | `com.troica.msa:events`       | Kafka 토픽 페이로드 Protobuf 스키마 (5개) + 생성된 Java/Kotlin 클래스 |
+| `events`       | `com.troica.msa:events`       | Kafka 토픽 페이로드 Protobuf 스키마 + 생성된 Java/Kotlin 클래스 |
+
+### v0.2.0에서 제거된 모듈 (2026-05-12 D2/D3 결정)
+
+- ~~`client-redis`~~ — 팀장님의 JitPack 패키지 `com.github.kanei0415:ktcloud-msa-client-redis:v1.0.2`로 일원화
+- ~~`client-ses`~~ — notification-service 폐기와 함께 dead code 정리
 
 ## 직렬화 결정
 
@@ -45,11 +48,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.troica.msa:common:0.1.0")
-    implementation("com.troica.msa:client-redis:0.1.0")  // 필요 시
-    implementation("com.troica.msa:client-ses:0.1.0")    // 필요 시
-    implementation("com.troica.msa:events:0.1.0")        // Kafka producer/consumer
+    implementation("com.troica.msa:common:0.3.0")
+    implementation("com.troica.msa:events:0.3.0")        // Kafka producer/consumer (코드 양립용; wire는 JSON)
 }
+
+// Redis 분산락/멱등 필요 서비스 (inventory, auth)는 JitPack 사용:
+//   repositories { maven { url = uri("https://jitpack.io") } }
+//   implementation("com.github.kanei0415:ktcloud-msa-client-redis:v1.0.2")
 ```
 
 로컬 개발 시 `~/.gradle/gradle.properties`에 `gpr.user`, `gpr.token` (packages:read 권한 PAT) 등록.
