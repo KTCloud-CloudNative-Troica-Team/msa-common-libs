@@ -19,7 +19,5 @@ rootProject.name = "msa-common-libs"
 
 include(
     "common",
-    "client-redis",
-    "client-ses",
     "events",
 )
