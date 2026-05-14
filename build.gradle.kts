@@ -7,6 +7,24 @@ plugins {
     kotlin("plugin.spring") version "2.1.0" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     `maven-publish`
+
+    // R-45 (평가 심화 (2)-1): SonarCloud 정적 분석 + 커버리지 게이트.
+    id("org.sonarqube") version "5.1.0.4882"
+}
+
+sonar {
+    properties {
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.organization", "ktcloud-cloudnative-troica-team")
+        property("sonar.projectKey", "KTCloud-CloudNative-Troica-Team_msa-common-libs")
+        property("sonar.qualitygate.wait", "true")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "**/build/reports/jacoco/test/jacocoTestReport.xml",
+        )
+        // Protobuf 코드젠 + build 산출물 제외 (common-libs:events 모듈)
+        property("sonar.exclusions", "**/generated/**, **/build/**, **/proto/**")
+    }
 }
 
 allprojects {
@@ -23,6 +41,8 @@ subprojects {
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "maven-publish")
     apply(plugin = "java-library")
+    // R-45: JaCoCo로 커버리지 측정 → SonarCloud가 XML report 읽음.
+    apply(plugin = "jacoco")
 
     // Spring Boot BOM 으로 의존성 버전을 통일 (사진 "기술 스택" 표준: SB 3.5.x).
     // 3.5.13 = 2026-03-26 release, Spring Cloud 2025.0.2가 공식 테스트한 짝. 3.5 OSS support는 2026-06-30 EOL 예정.
@@ -59,6 +79,19 @@ subprojects {
     plugins.withId("org.jetbrains.kotlin.kapt") {
         tasks.matching { it.name == "sourcesJar" }.configureEach {
             dependsOn("kaptKotlin")
+        }
+    }
+
+    // R-45: test → jacocoTestReport → Sonar XML report 자동 생성.
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+        finalizedBy(tasks.matching { it.name == "jacocoTestReport" })
+    }
+    tasks.withType<org.gradle.testing.jacoco.tasks.JacocoReport>().configureEach {
+        dependsOn(tasks.withType<Test>())
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
         }
     }
 
