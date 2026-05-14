@@ -23,6 +23,9 @@ dependencies {
 
     // R-57: 단위 테스트 — JUnit 5 + AssertJ + Mockito (spring-boot-starter-test BOM)
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Gradle 8.x + JUnit Platform 1.12+ 에서 OutputDirectoryProvider 가 launcher 측에 있어
+    // 명시적 testRuntimeOnly 필요. 없으면 "TestEngine with ID 'junit-jupiter' failed to discover tests" 발생.
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 sourceSets {
