@@ -20,6 +20,9 @@ dependencies {
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
     kapt("jakarta.persistence:jakarta.persistence-api")
     kapt("jakarta.annotation:jakarta.annotation-api")
+
+    // R-57: 단위 테스트 — JUnit 5 + AssertJ + Mockito (spring-boot-starter-test BOM)
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 sourceSets {
