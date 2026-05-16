@@ -10,8 +10,26 @@ plugins {
 }
 
 dependencies {
-    // Web 의존성은 ResponseStatusException, ResponseEntity 같은 공통 예외 매핑에 사용 (common/exception)
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    // common 모듈은 ResponseEntity + HttpStatus 만 사용 (common/exception/CustomException.kt).
+    // 둘 다 `spring-web` artifact 에 있음 (servlet + webflux 공통).
+    //
+    // 이전: `spring-boot-starter-web` (servlet 전체 - spring-mvc + tomcat 포함) →
+    //       consumer 가 reactive 면 classpath 충돌:
+    //         - Spring Cloud Gateway: "Spring MVC found on classpath, which is
+    //           incompatible with Spring Cloud Gateway"
+    //         - WebSecurityConfiguration vs WebFluxSecurityConfiguration bean 중복
+    //       이 issue 는 msa-api-gateway (SCG = reactive) 에서 발생.
+    //
+    // 본 변경: `spring-web` 만. spring-mvc + tomcat 안 가져옴.
+    //         consumer side:
+    //           - 5 service (auth/user/product/order/inventory): 자기 build.gradle.kts 에
+    //             `spring-boot-starter-web` 직접 명시 (grep 검증). 영향 0.
+    //           - msa-api-gateway: 자기 build 에 `spring-boot-starter-webflux` 명시.
+    //             공통 `spring-web` API + reactive runtime → 정합.
+    //
+    // `api` configuration: ResponseEntity 같은 public API 가 consumer compile classpath
+    // 에 노출되어야 하므로 `implementation` 보다 `api` 가 적절 (java-library plugin).
+    api("org.springframework:spring-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     runtimeOnly("com.h2database:h2")
