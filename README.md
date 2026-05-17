@@ -1,6 +1,10 @@
 # msa-common-libs
 
-Troica Market Service MSA polyrepo의 공용 라이브러리. **최신 stable: `v0.3.1`** (2026-05-13).
+Troica Market Service MSA polyrepo의 공용 라이브러리. **최신 stable: `v0.4.0`** (api-gateway 측 spring-web → spring-webflux 전환 측 servlet 의존성 제거).
+
+> 현재 service 측 사용 현황 (2026-05):
+> - `v0.4.0` 사용: api-gateway (WebFlux 측)
+> - `v0.3.1` 사용: auth-service / user-service / product-service / inventory-service / order-service (servlet 측, breaking 변경 없어 bump 미필요)
 
 > 단일 진실의 원천 (SPEC + ADR): [TROICA_SPEC.md](https://github.com/KTCloud-CloudNative-Troica-Team/msa-argocd-manifest/blob/main/docs/TROICA_SPEC.md), [ADR](https://github.com/KTCloud-CloudNative-Troica-Team/msa-argocd-manifest/tree/main/docs/adr)
 > 트러블슈팅: [TROUBLESHOOTING.md](https://github.com/KTCloud-CloudNative-Troica-Team/msa-argocd-manifest/blob/main/docs/TROUBLESHOOTING.md)
@@ -51,12 +55,18 @@ git push origin v0.3.2
 
 ---
 
-## 모듈 (v0.3.1 기준)
+## 모듈 (v0.4.0 기준)
 
 | 모듈 | 좌표 | 내용 |
 |------|------|------|
-| `common` | `com.troica.msa:common:0.3.1` | JPA/QueryDSL 설정 (`QuerydslConfig` 등), Base 엔티티, 공통 예외, 시간/Backoff 유틸. **kotlin-spring plugin** 적용으로 @Configuration 자동 non-final |
-| `events` | `com.troica.msa:events:0.3.1` | Kafka 토픽 페이로드 Protobuf 스키마 + 생성된 Java/Kotlin 클래스 |
+| `common` | `com.troica.msa:common:0.4.0` | JPA/QueryDSL 설정 (`QuerydslConfig` 등), Base 엔티티, 공통 예외, 시간/Backoff 유틸. **kotlin-spring plugin** 적용으로 @Configuration 자동 non-final. **v0.4.0**: spring-web 의존성 제거 (api-gateway 의 WebFlux 측 servlet 충돌 회피) |
+| `events` | `com.troica.msa:events:0.4.0` | Kafka 토픽 페이로드 Protobuf 스키마 + 생성된 Java/Kotlin 클래스 |
+
+### 5 service 측 v0.3.1 유지 사유
+
+auth / user / product / inventory / order 의 5 service 는 servlet (spring-web) 측 — common v0.3.1 의 spring-web 의존성과 호환. breaking 변경 없어 bump 미필요. v0.4.0 의 servlet 제거가 servlet 측 service 의 build 깨뜨림 (단순한 bump 측 X).
+
+향후 운영 단계 진입 시 5 service 도 v0.4.0 측 호환 fix + bump 일괄 진행 가능.
 
 ### 폐기된 모듈 (v0.3.0 trim, ADR-0002)
 
@@ -96,8 +106,13 @@ repositories {
 }
 
 dependencies {
-    implementation("com.troica.msa:common:0.3.1")
-    implementation("com.troica.msa:events:0.3.1")        // Kafka producer/consumer 사용 시
+    // WebFlux 측 (api-gateway 등)
+    implementation("com.troica.msa:common:0.4.0")
+    implementation("com.troica.msa:events:0.4.0")        // Kafka producer/consumer 사용 시
+
+    // 또는 servlet 측 (auth/user/product/inventory/order 등)
+    // implementation("com.troica.msa:common:0.3.1")
+    // implementation("com.troica.msa:events:0.3.1")
 }
 ```
 
